@@ -2286,51 +2286,6 @@ describe('BrowserWindow module', () => {
         });
       }).to.not.throw();
     });
-
-    it('correctly updates the height of the overlay', async () => {
-      const testOverlay = async (w: BrowserWindow, size: Number) => {
-        const overlayHTML = path.join(__dirname, 'fixtures', 'pages', 'overlay.html');
-        const overlayReady = emittedOnce(ipcMain, 'geometrychange');
-        await w.loadFile(overlayHTML);
-        await overlayReady;
-        const overlayEnabled = await w.webContents.executeJavaScript('navigator.windowControlsOverlay.visible');
-        expect(overlayEnabled).to.be.true('overlayEnabled');
-        const overlayRectPreMax = await w.webContents.executeJavaScript('getJSOverlayProperties()');
-        await w.maximize();
-        const max = await w.isMaximized();
-        expect(max).to.equal(true);
-        const overlayRectPostMax = await w.webContents.executeJavaScript('getJSOverlayProperties()');
-
-        expect(overlayRectPreMax.y).to.equal(0);
-        expect(overlayRectPreMax.x).to.equal(0);
-        expect(overlayRectPreMax.width).to.be.greaterThan(0);
-        expect(overlayRectPreMax.height).to.equal(size);
-        expect(overlayRectPostMax.height).to.equal(size);
-      };
-
-      const INITIAL_SIZE = 40;
-      const w = new BrowserWindow({
-        show: false,
-        width: 400,
-        height: 400,
-        titleBarStyle: 'hidden',
-        webPreferences: {
-          nodeIntegration: true,
-          contextIsolation: false
-        },
-        titleBarOverlay: {
-          height: INITIAL_SIZE
-        }
-      });
-
-      await testOverlay(w, INITIAL_SIZE);
-
-      w.setTitleBarOverlay({
-        height: INITIAL_SIZE + 10
-      });
-
-      await testOverlay(w, INITIAL_SIZE + 10);
-    });
   });
 
   ifdescribe(process.platform === 'darwin')('"enableLargerThanScreen" option', () => {
